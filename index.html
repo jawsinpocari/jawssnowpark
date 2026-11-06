@@ -971,7 +971,7 @@ function courseYaw(c,s){ const e=0.003; const dx=c.fx(s+e)-c.fx(s), dz=(Z1-Z0)*e
 
 /* --- 리프트: 양 끝 둥근 승강장에서 의자가 큰 바퀴를 돌아 올라감 --- */
 const LR=3.2;
-const LIFT_SPEED=34;   /* 정상까지 약 29초 */          // m/s (정상까지 약 25초)                 // 바퀴 반지름 = 오르는 줄·내려오는 줄 간격의 절반
+const LIFT_SPEED=24.5;   /* 정상까지 약 40초 (약 88km/h) */          // m/s (정상까지 약 25초)                 // 바퀴 반지름 = 오르는 줄·내려오는 줄 간격의 절반
 const Z_BASE=10, Z_TOP=TOP_Z-11;
 function cableH(z){ // 승강장 근처는 낮게(타고 내리기 쉽게), 중간은 높게 — 정상 쪽은 길게 천천히 내려앉음
   const sm=t=>{ t=clamp(t,0,1); return t*t*t*(t*(t*6-15)+10); };
@@ -1068,7 +1068,7 @@ const liftChairs=[], bullwheels=[];
   // 케이블 (양 끝 반원 포함)
   const pts=[]; for(let q=0;q<=LOOP;q+=2){ const p=loopPos(q); pts.push(new T.Vector3(p.x,p.y,p.z)); }
   scene.add(new T.Line(new T.BufferGeometry().setFromPoints(pts),new T.LineBasicMaterial({color:0x55606e})));
-  for(let i=0;i<12;i++){ const c=makeChair(); c.userData.t=i/12*T_LOOP;   /* 의자 4개 줄임 */ scene.add(c); liftChairs.push(c); if(i%2===0) c.userData.wantRider=true; }
+  for(let i=0;i<12;i++){ const c=makeChair(); c.userData.t=i/12*T_LOOP;   /* 의자 4개 줄임 */ scene.add(c); liftChairs.push(c); if(i%4===0) c.userData.wantRider=true; }
   // 둥근 승강장
   const ringMat=new T.MeshLambertMaterial({color:0xc9d6e3}), lineMat=new T.MeshBasicMaterial({color:NEON_PINK});
   const terminal=(z,y,label,front)=>{
@@ -1984,7 +1984,7 @@ const rnd=n=>Math.floor(Math.random()*n);
 const SLOPE_NPCS=[];
 const NPC_NAMES=["눈송이","보드천재","스키왕","썰매짱","겨울바람","폴짝이","미끄럼쟁이","하얀토끼"];
 function buildSlopeNpcs(){ const kinds=["rat","ox","tiger","rabbit","dragon","snake","horse","sheep","monkey","rooster","dog","pig"], gears=["ski","board","sled"];
-  for(let i=0;i<6;i++){ const look={name:NPC_NAMES[i],gear:gears[i%3],c:[rnd(PALETTE.length),rnd(PALETTE.length),rnd(PALETTE.length),rnd(PALETTE.length)],hat:0,ak:kinds[rnd(kinds.length)]};
+  for(let i=0;i<3;i++){ const look={name:NPC_NAMES[i],gear:gears[i%3],c:[rnd(PALETTE.length),rnd(PALETTE.length),rnd(PALETTE.length),rnd(PALETTE.length)],hat:0,ak:kinds[rnd(kinds.length)]};
     const P=buildAvatar(look,false); scene.add(P.root); const n={P,look,run:null,i}; newRun(n,performance.now()-rnd(60000)); SLOPE_NPCS.push(n); } }
 function newRun(n,now){ const side=Math.random()<0.5?-1:1, dur=(n.look.gear==="sled"?95:70)+Math.random()*35;
   const falls=[]; const nf=Math.random()<0.35?0:Math.random()<0.7?1:2; for(let k=0;k<nf;k++) falls.push(0.12+Math.random()*0.75);
@@ -2045,7 +2045,7 @@ function buildStudents(){ const kinds=["rabbit","sheep","dog","pig","tiger","rat
     const txt=[..."죠스대학교"], cx=256, cy=400, R=300, step=0.27; x.fillStyle="#1d2b3e"; x.font="bold 84px 'Gowun Dodum', sans-serif"; x.textAlign="center"; x.textBaseline="middle";
     txt.forEach((ch,i)=>{ const a=(i-(txt.length-1)/2)*step; x.save(); x.translate(cx+Math.sin(a)*R, cy-Math.cos(a)*R); x.rotate(a); x.fillText(ch,0,0); x.restore(); });
     return new T.CanvasTexture(c); })();
-  for(let i=0;i<12;i++){ const P=buildAvatar({name:`죠스대 ${STU_NAMES[i]}`,gear:"ski",c:[(i*3)%PALETTE.length,10,(i*7+1)%PALETTE.length,0],hat:0,ak:kinds[i]},false); scene.add(P.root); P.root.visible=false;
+  for(let i=0;i<10;i++){ const P=buildAvatar({name:`죠스대 ${STU_NAMES[i]}`,gear:"ski",c:[(i*3)%PALETTE.length,10,(i*7+1)%PALETTE.length,0],hat:0,ak:kinds[i]},false); scene.add(P.root); P.root.visible=false;
     const vest=new T.Mesh(new T.SphereGeometry(0.33,18,12,0,Math.PI*2,0.25,Math.PI*0.55),new T.MeshLambertMaterial({color:0xffd21e})); vest.scale.set(1.04,1.14,0.78); vest.position.y=0.3; P.torso.add(vest);   /* 검은 상의 위에 노란 조끼 */
     const back=new T.Mesh(new T.PlaneGeometry(0.56,0.28),new T.MeshBasicMaterial({map:vt,transparent:true,alphaTest:0.3})); back.position.set(0,0.34,-0.262); back.rotation.y=Math.PI; P.torso.add(back);
     STUDENTS.push({P,i,pos:new T.Vector3(),yaw:0}); } }
@@ -2105,7 +2105,7 @@ function updateParkBoard(now){
     b.fillStyle="rgba(0,0,0,.28)"; for(let yy=0;yy<Hh;yy+=6) b.fillRect(0,yy,W,2); for(let xx=0;xx<W;xx+=6) b.fillRect(xx,0,2,Hh);
     B.base=bc; }
   x.drawImage(B.base,0,0);
-  const online=[look.name,...[...PEER_STATS.values()].map(o=>o.name)].filter(Boolean); online.forEach(addVisitor);   /* 지금 접속 중인 사람 */
+  const online=[look.name,...[...PEER_STATS.values()].map(o=>o.name)].filter(Boolean);   /* 지금 접속 중인 사람만 */
   /* 노란 네온 흐르는 글씨 두 줄: 위(JAWS SNOW PARK 위) = 접속자·다녀간 사람, 아래(글자 밑) = 환영 인사 */
   const strip=(y0,h,msg,key,spd,fs=46,once=false)=>{ x.save(); x.beginPath(); x.rect(40,y0,W-80,h); x.clip();
     x.fillStyle="#05080f"; x.fillRect(40,y0,W-80,h); x.fillStyle="rgba(255,178,30,.08)"; x.fillRect(40,y0,W-80,h);
@@ -2118,7 +2118,7 @@ function updateParkBoard(now){
     x.lineWidth=2.5; x.strokeStyle="#ffb21e"; xs.forEach(px=>{ x.fillText(msg,px,cy); x.strokeText(msg,px,cy); }); x.shadowBlur=0;
     x.fillStyle="rgba(0,0,0,.28)"; for(let yy=y0;yy<y0+h;yy+=6) x.fillRect(40,yy,W-80,2); for(let xx=40;xx<W-40;xx+=6) x.fillRect(xx,y0,2,h);
     x.restore(); };
-  strip(16,80,`   NOW ONLINE ▸ ${online.join("  ·  ")}   ★   VISITORS ▸ ${VISITORS.join("  ·  ")}   `,"offA",3,34,true);
+  strip(16,80,`   NOW ONLINE ▸ ${online.join("  ·  ")}   `,"offA",3,34,true);
   { const d=new Date(), hh=d.getHours(); const tod=hh<6?"새벽":hh<12?"오전":hh<18?"오후":"야간";
     strip(304,80,`   WELCOME TO JAWS SNOW PARK   ★   오늘의 날씨 ▸ 눈 ❄ 기온 −7°C · 체감 −11°C · 바람 북서풍 약함 2m/s   ★   ${tod} 설질 ▸ 파우더 · 적설 32cm · 시야 좋음   ★   전 슬로프 정상 운영 · 리프트 운행 중   ★   추우면 오두막 모닥불에서 몸을 녹이세요 🔥   `,"offB",4); }
   B.tex.needsUpdate=true;
@@ -3775,11 +3775,25 @@ function placeSun(){ const sa=(kstHourCached-6)/12*Math.PI, el=Math.max(0.3,Math
 const remotes=new Map();
 let room=null, lastShare=0;
 function shareThrottled(now){ if(now-lastShare>110){ lastShare=now; share(); } }
+/* 공유 데이터는 presence 한도(문자열 1KiB · 전체 4KiB) 안에 맞춤: 넘으면 presence 전체가 거부돼서 서로 안 보임 */
+const U8=new TextEncoder(), bytesOf=x=>U8.encode(typeof x==="string"?x:JSON.stringify(x)).length;
+function fitArr(arr,lim){ /* 배열을 JSON으로 lim 바이트 안에 들어가게 앞에서부터 담기 */ const out=[]; let n=2; for(const v of arr){ const b=bytesOf(v)+1; if(n+b>lim) break; out.push(v); n+=b; } return out; }
+function rotate(arr,k){ if(arr.length<2) return arr; const o=k%arr.length; return arr.slice(o).concat(arr.slice(0,o)); }
+let extrasCache=null, extrasAt=0;
+function sharedExtras(){ const now=performance.now(); if(extrasCache && now-extrasAt<1500) return extrasCache; extrasAt=now;
+  const tick=Math.floor(Date.now()/4000);
+  const rbT=JSON.parse(rankShare()).t, rbE=fitArr(Object.entries(rbT),880), rb=JSON.stringify({t:Object.fromEntries(rbE)});
+  const kb=JSON.stringify(fitArr(BOARD_LOG,600));
+  const clv=TREES.flatMap((tr,ti)=>tr.items.slice(-CLOVER_MAX).map(o=>[ti,o.userData.text,o.userData.at]));
+  const cv=JSON.stringify(fitArr(rotate(clv,tick*6),900));   /* 조금씩 돌려가며 전부 전달 */
+  const ex={rb,kb,cv};
+  for(const k of ["cv","rb","kb"]){ if(bytesOf(ex)<=2600) break; ex[k]=""; }   /* 기본 정보 + 여유를 남김 */
+  return (extrasCache=ex); }
 function share(force){
   if(!room) return;
   room.presence({v:3, n:look.name, g:look.gear, c:look.c, h:look.hat, ak:look.ak,
     m:me.mode, x:+me.pos.x.toFixed(2), y:+me.pos.y.toFixed(2), z:+me.pos.z.toFixed(2), r:+me.yaw.toFixed(2),
-    sit:me.sit, ss:me.ss|0, a:me.act||"", an:me.actN, tk:me.tuckNow?1:0, st:+me.steer.toFixed(2), air:me.air?1:0, co:me.course, cw:me.carry?1:0, fd:me.food||"", bm:me.bm||"", bt:me.bt||0, cl:me.cl||"", ct:me.ct||0, tr:me.ctr||0, bv:me.bestV||0, jt:me.jumpTotal||0, rn:RUNS, sb:me.sb||"", sbt:me.sbt||0, rb:rankShare(), kb:JSON.stringify(BOARD_LOG), cv:JSON.stringify(TREES.flatMap((tr,ti)=>tr.items.slice(-CLOVER_MAX).map(o=>[ti,o.userData.text,o.userData.at])).slice(-40)), vs:VISITORS.slice(0,150).join("\u001f")}).catch(()=>{});
+    sit:me.sit, ss:me.ss|0, a:me.act||"", an:me.actN, tk:me.tuckNow?1:0, st:+me.steer.toFixed(2), air:me.air?1:0, co:me.course, cw:me.carry?1:0, fd:me.food||"", bm:me.bm||"", bt:me.bt||0, cl:me.cl||"", ct:me.ct||0, tr:me.ctr||0, bv:me.bestV||0, jt:me.jumpTotal||0, rn:RUNS, sb:me.sb||"", sbt:me.sbt||0, ...sharedExtras()}).catch(e=>{ if(!share.__warned){ share.__warned=1; console.warn("presence",e&&e.code,e&&e.message); } });
 }
 function readPeer(p){
   const q=p.presence||{}; if(q.v!==3) return null;
@@ -3813,7 +3827,7 @@ function applyPeers(list){
     if(q.cl && q.ct){ const tr=TREES[q.tr]||TREES[0]; const key=p.peer+"|"+q.ct; if(tr && !tr.seen.has(key)){ tr.seen.add(key); hangClover(q.cl,false,q.ct,TREES.indexOf(tr)); } }   // 다른 사람이 건 클로버
     if(q.sb && q.sbt && q.sbt!==r.sbt){ r.sbt=q.sbt; if(Date.now()-q.sbt<30000 && r.P) showBubble(r.P,q.sb,q.sbt); }   /* 다른 사람 말풍선 */
     if(q.rb){ try{ mergeRank(JSON.parse(q.rb)); }catch(e){} }   /* 누적 랭킹 공유 */
-    addVisitor(q.name); if(q.vs) q.vs.split("\u001f").slice(0,150).forEach(addVisitor);   /* 다녀간 사람 이어받기 */
+    /* 다녀간 사람 이어받기 */
     if(q.cv){ try{ const a=JSON.parse(q.cv); if(Array.isArray(a)) a.slice(-40).forEach(c=>{ if(Array.isArray(c) && TREES[c[0]] && typeof c[1]==="string" && +c[2]>0) hangClover(cleanText15(c[1]),false,+c[2],c[0]); }); }catch(e){} }   /* 나간 사람 클로버도 이어받음 */
     if(q.kb){ try{ const a=JSON.parse(q.kb); if(Array.isArray(a)) a.slice(0,2).forEach(addBoardMsg); }catch(e){} }   /* 나간 사람 글도 이어받음 */
     if(r.pos.distanceTo(r.tgt)>40) r.pos.copy(r.tgt);
@@ -3833,9 +3847,59 @@ function updateRemotes(dt,now){
     pose(r.P,{food:r.food, stool:r.mode==="sit"&&!!(BENCHES[r.sit]&&BENCHES[r.sit].stool), mode:r.mode, act:A?.k, actP:A?.p, tuck:r.tuck, steer:r.steer, air:r.air, walking:moving && (r.mode==="walk"||r.mode==="top"), carry:r.carry},now);
   }
 }
+/* ===== 공개 실시간 서버(MQTT over WebSocket)로 같은 공간 만들기: Claude 계정 없이도, GitHub 주소로 들어와도 모두 한 방 =====
+   claude.ai 방(room)은 로그인한 같은 조직 사람만 들어올 수 있어서, 누구나 쓰는 공개 브로커를 먼저 쓰고 안 되면 claude.ai 방으로 */
+const NET_BROKERS=["wss://broker.emqx.io:8084/mqtt","wss://broker.hivemq.com:8884/mqtt","wss://test.mosquitto.org:8081/mqtt"];
+const NET_BASE="jawssnowpark/v3/";
+function mqttRoom(url){ return new Promise(res=>{
+  const me_id=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4), topic=NET_BASE+"p/"+me_id, enc=new TextEncoder(), dec=new TextDecoder();
+  let ws; try{ ws=new WebSocket(url,"mqtt"); }catch(e){ res(null); return; } ws.binaryType="arraybuffer";
+  const str=t=>{ const b=enc.encode(t); return [b.length>>8,b.length&255,...b]; };
+  const pkt=(h,body)=>{ const len=[]; let n=body.length; do{ let d=n%128; n=Math.floor(n/128); if(n>0) d|=128; len.push(d); }while(n>0); return new Uint8Array([h,...len,...body]); };
+  const send=u=>{ try{ if(ws.readyState===1) ws.send(u); }catch(e){} };
+  const pub=(t,payload)=>send(pkt(0x30,[...str(t),...enc.encode(payload)]));
+  let ok=false, done=false, buf=new Uint8Array(0), connCbs=[], peerCbs=[], peers=new Map(), mine={}, lastFull=0, lastSent="", pingT=0, flushT=0;
+  const fail=()=>{ if(!done){ done=true; res(null); } };
+  const tmo=setTimeout(()=>{ try{ ws.close(); }catch(e){} fail(); },5000);
+  ws.onopen=()=>{ /* CONNECT (clean session + will: 나가면 빈 메시지 → 퇴장) */
+    const body=[...str("MQTT"),4,0x06,0,45,...str("jsp_"+me_id),...str(topic),0,0]; send(pkt(0x10,body)); };
+  ws.onerror=fail;
+  ws.onclose=()=>{ ok=false; connCbs.forEach(f=>f(false)); clearInterval(pingT); fail(); if(api.__live){ setTimeout(()=>api.__reconnect&&api.__reconnect(),3000); } };
+  const emitPeers=()=>{ if(flushT) return; flushT=setTimeout(()=>{ flushT=0; const list=[...peers.values()].map(p=>({peer:p.id,isMe:false,sameTab:false,kind:"viewer",guest:false,presence:p.pr,updatedAt:p.at}));
+      list.push({peer:me_id,isMe:true,sameTab:true,kind:"viewer",guest:false,presence:mine,updatedAt:Date.now()}); peerCbs.forEach(f=>f({peers:list})); },60); };
+  ws.onmessage=e=>{ const d=new Uint8Array(e.data), nb=new Uint8Array(buf.length+d.length); nb.set(buf); nb.set(d,buf.length); buf=nb;
+    for(;;){ if(buf.length<2) break; let mul=1,len=0,i=1,b; do{ if(i>=buf.length) return; b=buf[i++]; len+=(b&127)*mul; mul*=128; }while(b&128);
+      if(buf.length<i+len) break; const h=buf[0], body=buf.slice(i,i+len); buf=buf.slice(i+len);
+      const type=h>>4;
+      if(type===2){ clearTimeout(tmo); if(body[1]!==0){ fail(); return; } ok=true; done=true;
+        send(pkt(0x82,[0,1,...str(NET_BASE+"p/+"),0])); pingT=setInterval(()=>send(new Uint8Array([0xC0,0])),20000);
+        connCbs.forEach(f=>f(true)); res(api); }
+      else if(type===3){ const tl=(body[0]<<8)|body[1], t=dec.decode(body.slice(2,2+tl)); let off=2+tl; if((h>>1)&3) off+=2;
+        const id=t.slice((NET_BASE+"p/").length); if(!id || id===me_id || id.length>32) continue;
+        const raw=body.slice(off); if(!raw.length){ if(peers.delete(id)) emitPeers(); continue; }   /* 퇴장 */
+        if(raw.length>6000) continue; let o; try{ o=JSON.parse(dec.decode(raw)); }catch(_){ continue; } if(!o||typeof o!=="object"||Array.isArray(o)) continue;
+        const p=peers.get(id)||{id,pr:{}}; p.pr=Object.freeze({...p.pr,...o}); p.at=Date.now(); peers.set(id,p); emitPeers(); } } };
+  /* 6초 동안 소식이 없으면 나간 걸로 */
+  setInterval(()=>{ const now=Date.now(); let ch=false; for(const [id,p] of peers) if(now-p.at>7000){ peers.delete(id); ch=true; } if(ch) emitPeers(); },1500);
+  const EXTRA=["rb","kb","cv"];
+  const flush=()=>{ if(!ok) return; const now=Date.now(), full=now-lastFull>2500; const o={};
+    for(const k in mine){ if(!full && EXTRA.includes(k)) continue; o[k]=mine[k]; }
+    const j=JSON.stringify(o); if(!full && j===lastSent && now-lastFull<1200) return; if(full) lastFull=now; lastSent=j; pub(topic,j); };
+  setInterval(flush,1000);   /* 가만히 있어도 살아있다고 알림 */
+  addEventListener("pagehide",()=>{ try{ pub(topic,""); ws.close(); }catch(e){} });
+  const api={ net:true, url,
+    presence(patch){ for(const k in patch){ if(patch[k]===null) delete mine[k]; else mine[k]=patch[k]; } flush(); return Promise.resolve(); },
+    onConnection(f){ connCbs.push(f); setTimeout(()=>f(ok),0); return ()=>{}; },
+    onPeers(f){ peerCbs.push(f); emitPeers(); return ()=>{}; },
+    peers(){ return [...peers.values()]; }, connected(){ return ok; } };
+}); }
+async function connectNet(){ for(const u of NET_BROKERS){ const r=await mqttRoom(u); if(r) return r; } return null; }
 async function connectRoom(){
   const dot=document.getElementById("conn-dot");
-  try{ room = window.claude?.use ? await window.claude.use("room") : null; }catch(e){ room=null; }
+  room = await connectNet();   /* 누구나 접속하는 공개 서버 먼저 */
+  if(room){ const rc=async()=>{ const r=await connectNet(); if(r){ room=r; r.__live=true; r.__reconnect=rc; r.onConnection(ok=>dot.classList.toggle("off",!ok)); r.onPeers(ch=>applyPeers(ch.peers)); share(true); } else setTimeout(rc,8000); };
+    room.__live=true; room.__reconnect=rc; }
+  if(!room){ try{ room = window.claude?.use ? await window.claude.use("room") : null; }catch(e){ room=null; } }
   if(!room){ const n=document.getElementById("note"); n.hidden=true; return; }
   room.onConnection(ok=>dot.classList.toggle("off",!ok),()=>dot.classList.add("off"));
   room.onPeers(ch=>applyPeers(ch.peers),()=>{});
@@ -4118,6 +4182,7 @@ function rankShare(){ /* 각 부문 상위 10명씩 공유 */ const pick=new Set
 let rankSaveAt=0;
 /* 다녀간 닉네임 누적 (접속자끼리 공유 + 이 기기에 저장, 최근 60명) */
 let VISITORS=(()=>{ try{ const a=JSON.parse(localStorage.getItem("seolsan3d-visitors")||"[]"); return Array.isArray(a)?a.filter(x=>typeof x==="string" && !NPC_NAMES.includes(x)).slice(0,300):[]; }catch(e){ return []; } })();
+try{ localStorage.removeItem("seolsan3d-visitors"); }catch(e){}   /* VISITORS 없앰 */
 function addVisitor(n){ n=cleanName(n); if(!n || VISITORS.includes(n) || NPC_NAMES.includes(n)) return; VISITORS.unshift(n); VISITORS=VISITORS.slice(0,300);   /* NPC 이름은 빼고 */ try{ localStorage.setItem("seolsan3d-visitors",JSON.stringify(VISITORS)); }catch(e){} }
 function mergeRank(o){ let ch=false; const t=o&&o.t;
   if(t && typeof t==="object"){ let c=0; for(const n in t){ if(++c>60) break; const v=t[n]; if(Array.isArray(v)) ch=nsPut(n,{bv:v[0],jt:v[1],rn:v[2]})||ch; } }
